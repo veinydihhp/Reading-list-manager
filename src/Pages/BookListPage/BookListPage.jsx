@@ -10,7 +10,7 @@ const BookListPage = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Fetch books from Supabase when component mounts or when search/filter changes
+  // Fetch books from Supabase
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
@@ -19,7 +19,6 @@ const BookListPage = () => {
         .select("*")
         .order("date_added", { ascending: false });
 
-      // Search title OR author (case-insensitive)
       if (search) {
         query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
       }
@@ -40,7 +39,7 @@ const BookListPage = () => {
     fetchBooks();
   }, [search, filterStatus]);
 
-  // --- DELETE FUNCTION ---
+  // DELETE FUNCTION
   const handleDelete = async (bookId) => {
     if (!window.confirm("Are you sure you want to delete this book?")) return;
     setLoading(true);
@@ -49,6 +48,25 @@ const BookListPage = () => {
       setBooks((prev) => prev.filter((book) => book.id !== bookId));
     } else {
       alert("Failed to delete book");
+    }
+    setLoading(false);
+  };
+
+  // STATUS CHANGE FUNCTION
+  const handleStatusChange = async (bookId, newStatus) => {
+    setLoading(true);
+    const { error } = await supabase
+      .from("books")
+      .update({ status: newStatus })
+      .eq("id", bookId);
+    if (!error) {
+      setBooks((prev) =>
+        prev.map((book) =>
+          book.id === bookId ? { ...book, status: newStatus } : book
+        )
+      );
+    } else {
+      alert("Failed to update status: " + error.message);
     }
     setLoading(false);
   };
@@ -84,7 +102,7 @@ const BookListPage = () => {
           books={books}
           loading={loading}
           onDelete={handleDelete}
-          onStatusChange={() => {}} // We'll implement this soon!
+          onStatusChange={handleStatusChange}
         />
         <Link
           to="/add"
