@@ -43,7 +43,7 @@ const BookListPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-indigo-600 via-sky-300 to-emerald-300 flex items-center justify-center font-sans transition-all">
-      <div className="w-full max-w-4xl bg-white/90 shadow-2xl rounded-3xl px-8 py-12 flex flex-col items-center ring-1 ring-indigo-200 backdrop-blur-md">
+      <div className="w-full max-w-6xl bg-white/90 shadow-2xl rounded-3xl px-10 py-12 flex flex-col items-center ring-1 ring-indigo-200 backdrop-blur-md">
         <h1 className="text-5xl font-extrabold text-indigo-800 mb-8 tracking-tight flex items-center gap-3 drop-shadow-lg">
           <span className="p-2 bg-emerald-100 rounded-xl shadow-lg animate-pulse">
             <svg
