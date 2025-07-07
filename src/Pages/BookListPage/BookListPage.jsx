@@ -10,8 +10,8 @@ const BookListPage = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
+  // Fetch books from Supabase when component mounts or when search/filter changes
   useEffect(() => {
-    // Fetch books from Supabase when component mounts or when search/filter changes
     const fetchBooks = async () => {
       setLoading(true);
       let query = supabase
@@ -19,9 +19,8 @@ const BookListPage = () => {
         .select("*")
         .order("date_added", { ascending: false });
 
-      // Optional: Apply search or filter using Supabase query
+      // Search title OR author (case-insensitive)
       if (search) {
-        // Search title OR author (case-insensitive)
         query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
       }
       if (filterStatus) {
@@ -39,7 +38,20 @@ const BookListPage = () => {
     };
 
     fetchBooks();
-  }, [search, filterStatus]); // Re-run when search/filter changes
+  }, [search, filterStatus]);
+
+  // --- DELETE FUNCTION ---
+  const handleDelete = async (bookId) => {
+    if (!window.confirm("Are you sure you want to delete this book?")) return;
+    setLoading(true);
+    const { error } = await supabase.from("books").delete().eq("id", bookId);
+    if (!error) {
+      setBooks((prev) => prev.filter((book) => book.id !== bookId));
+    } else {
+      alert("Failed to delete book");
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-indigo-600 via-sky-300 to-emerald-300 flex items-center justify-center font-sans transition-all">
@@ -71,8 +83,8 @@ const BookListPage = () => {
         <BookList
           books={books}
           loading={loading}
-          onDelete={() => {}} // We will add delete logic soon!
-          onStatusChange={() => {}} // We will add status update logic soon!
+          onDelete={handleDelete}
+          onStatusChange={() => {}} // We'll implement this soon!
         />
         <Link
           to="/add"
