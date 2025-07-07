@@ -1,13 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BookList from "../../Components/Booklist/BookList";
 import SearchBar from "../../Components/SearchBar/SearchBar";
 import { Link } from "react-router-dom";
+import { supabase } from "../../supabaseClient";
 
 const BookListPage = () => {
-  const [books] = useState([]);
-  const [loading] = useState(false);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+
+  useEffect(() => {
+    // Fetch books from Supabase when component mounts or when search/filter changes
+    const fetchBooks = async () => {
+      setLoading(true);
+      let query = supabase
+        .from("books")
+        .select("*")
+        .order("date_added", { ascending: false });
+
+      // Optional: Apply search or filter using Supabase query
+      if (search) {
+        // Search title OR author (case-insensitive)
+        query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
+      }
+      if (filterStatus) {
+        query = query.eq("status", filterStatus);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("Error fetching books:", error);
+        setBooks([]);
+      } else {
+        setBooks(data);
+      }
+      setLoading(false);
+    };
+
+    fetchBooks();
+  }, [search, filterStatus]); // Re-run when search/filter changes
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-indigo-600 via-sky-300 to-emerald-300 flex items-center justify-center font-sans transition-all">
@@ -39,8 +71,8 @@ const BookListPage = () => {
         <BookList
           books={books}
           loading={loading}
-          onDelete={() => {}}
-          onStatusChange={() => {}}
+          onDelete={() => {}} // We will add delete logic soon!
+          onStatusChange={() => {}} // We will add status update logic soon!
         />
         <Link
           to="/add"
@@ -52,4 +84,5 @@ const BookListPage = () => {
     </div>
   );
 };
+
 export default BookListPage;
